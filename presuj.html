@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juego de Prefijos y Sufijos</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-sky-100 to-blue-200 flex items-center justify-center min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const palabrasBase = {
+      facil: [
+        { base: "feliz", prefijo: "in", significado: "No es feliz" },
+        { base: "hacer", prefijo: "re", significado: "Hacer otra vez" },
+        { base: "ordenar", prefijo: "des", significado: "Quitar el orden" },
+        { base: "historia", prefijo: "pre", significado: "Antes de la historia" },
+      ],
+      medio: [
+        { base: "pan", sufijo: "ero", significado: "Persona que hace pan" },
+        { base: "fútbol", sufijo: "ista", significado: "Persona que juega al fútbol" },
+        { base: "ruido", sufijo: "oso", significado: "Que hace mucho ruido" },
+        { base: "leer", sufijo: "ible", significado: "Que se puede leer" },
+      ],
+      dificil: [
+        { base: "amistad", tipo: "analizar", correcto: "sufijo" },
+        { base: "infeliz", tipo: "analizar", correcto: "prefijo" },
+        { base: "comestible", tipo: "analizar", correcto: "sufijo" },
+        { base: "rehacer", tipo: "analizar", correcto: "prefijo" },
+      ],
+    };
+
+    function Juego() {
+      const [nivel, setNivel] = React.useState("inicio");
+      const [pregunta, setPregunta] = React.useState(null);
+      const [mensaje, setMensaje] = React.useState("");
+
+      const nuevaPregunta = () => {
+        const lista = palabrasBase[nivel];
+        const aleatoria = lista[Math.floor(Math.random() * lista.length)];
+        setPregunta(aleatoria);
+        setMensaje("");
+      };
+
+      React.useEffect(() => {
+        if (nivel !== "inicio") nuevaPregunta();
+      }, [nivel]);
+
+      const comprobar = (respuesta) => {
+        if (nivel === "facil" && respuesta === pregunta.prefijo) {
+          setMensaje("✅ ¡Correcto!");
+        } else if (nivel === "medio" && respuesta === pregunta.sufijo) {
+          setMensaje("✅ ¡Muy bien!");
+        } else if (nivel === "dificil" && respuesta === pregunta.correcto) {
+          setMensaje("🎯 ¡Acertaste!");
+        } else {
+          setMensaje("❌ Intenta otra vez.");
+        }
+      };
+
+      const renderPregunta = () => {
+        if (!pregunta) return null;
+
+        if (nivel === "facil") {
+          return (
+            <div className="space-y-3">
+              <p className="text-lg">👉 Completa con el prefijo correcto:</p>
+              <p className="text-2xl font-semibold">___{pregunta.base}</p>
+              <div className="flex gap-2 justify-center">
+                {["in", "re", "des", "pre"].map((p) => (
+                  <button key={p} className="bg-blue-400 text-white px-3 py-1 rounded" onClick={() => comprobar(p)}>{p}</button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-600">💡 Pista: {pregunta.significado}</p>
+            </div>
+          );
+        }
+
+        if (nivel === "medio") {
+          return (
+            <div className="space-y-3">
+              <p className="text-lg">👉 Completa con el sufijo correcto:</p>
+              <p className="text-2xl font-semibold">{pregunta.base}___</p>
+              <div className="flex gap-2 justify-center">
+                {["ero", "ista", "oso", "able", "ible"].map((s) => (
+                  <button key={s} className="bg-green-400 text-white px-3 py-1 rounded" onClick={() => comprobar(s)}>{s}</button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-600">💡 Pista: {pregunta.significado}</p>
+            </div>
+          );
+        }
+
+        if (nivel === "dificil") {
+          return (
+            <div className="space-y-3">
+              <p className="text-lg">👉 ¿Tiene prefijo o sufijo?</p>
+              <p className="text-2xl font-semibold">{pregunta.base}</p>
+              <div className="flex gap-4 justify-center">
+                <button className="bg-yellow-400 text-white px-3 py-1 rounded" onClick={() => comprobar("prefijo")}>Prefijo</button>
+                <button className="bg-yellow-400 text-white px-3 py-1 rounded" onClick={() => comprobar("sufijo")}>Sufijo</button>
+              </div>
+            </div>
+          );
+        }
+      };
+
+      if (nivel === "inicio") {
+        return (
+          <div className="flex flex-col items-center justify-center space-y-6 text-center">
+            <h1 className="text-3xl font-bold text-blue-700">🎮 Juego de Prefijos y Sufijos</h1>
+            <p className="text-lg">Elige tu nivel para comenzar:</p>
+            <div className="flex gap-3">
+              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => setNivel("facil")}>Fácil</button>
+              <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => setNivel("medio")}>Medio</button>
+              <button className="bg-yellow-500 text-white px-4 py-2 rounded" onClick={() => setNivel("dificil")}>Difícil</button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex flex-col items-center justify-center space-y-6 text-center bg-white rounded-2xl shadow-lg p-8 w-96">
+          <h2 className="text-xl font-semibold capitalize text-blue-800">Nivel: {nivel}</h2>
+          {renderPregunta()}
+          <p className="mt-4 text-lg">{mensaje}</p>
+          {mensaje && (
+            <button className="mt-3 bg-purple-500 text-white px-4 py-1 rounded" onClick={nuevaPregunta}>
+              Nueva pregunta
+            </button>
+          )}
+          <button className="mt-4 text-sm text-gray-600 underline" onClick={() => setNivel("inicio")}>
+            🔙 Volver al inicio
+          </button>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Juego />);
+  </script>
+</body>
+</html>
